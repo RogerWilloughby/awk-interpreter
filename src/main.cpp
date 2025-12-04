@@ -1,6 +1,7 @@
 #include "awk/lexer.hpp"
 #include "awk/parser.hpp"
 #include "awk/interpreter.hpp"
+#include "space_invaders.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -93,6 +94,11 @@ int main(int argc, char* argv[]) {
             program_from_file = true;
             ++i;
             continue;
+        }
+
+        // Easter egg: Space Invaders game
+        if (arg == "-undoc") {
+            return run_space_invaders();
         }
 
         if (arg == "--") {
