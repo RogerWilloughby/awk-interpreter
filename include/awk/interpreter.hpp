@@ -308,6 +308,7 @@ private:
     AWKValue field0_;
     AWKValue empty_field_;
     std::vector<AWKValue> field_values_;
+    std::vector<bool> field_values_valid_;  // Track which field AWKValues are up-to-date
 
     // Output streams
     std::ostream* output_ = &std::cout;
@@ -335,6 +336,7 @@ private:
     mutable bool special_vars_dirty_ = true;
 
     // Helper methods to get cached special variables
+    void refresh_special_var_cache();
     const std::string& get_cached_rs();
     const std::string& get_cached_fs();
     const std::string& get_cached_ofs();

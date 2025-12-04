@@ -1,6 +1,7 @@
 #include "awk/lexer.hpp"
 #include "awk/parser.hpp"
 #include "awk/interpreter.hpp"
+#include "awk/platform.hpp"
 #include "space_invaders.hpp"
 #include <iostream>
 #include <fstream>
@@ -119,7 +120,7 @@ int main(int argc, char* argv[]) {
     if (program_from_file) {
         std::ifstream file(program_file);
         if (!file) {
-            std::cerr << "awk: can't open file " << program_file << ": " << std::strerror(errno) << "\n";
+            std::cerr << "awk: can't open file " << program_file << ": " << awk::safe_strerror(errno) << "\n";
             return 1;
         }
         std::ostringstream ss;

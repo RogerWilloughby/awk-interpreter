@@ -4,6 +4,7 @@
 
 #include "awk/interpreter.hpp"
 #include "awk/i18n.hpp"
+#include "awk/platform.hpp"
 #include <sstream>
 #include <cmath>
 #include <algorithm>
@@ -37,52 +38,52 @@ Interpreter::Interpreter() {
 // Cached Special Variable Accessors (Performance Optimization)
 // ============================================================================
 
+void Interpreter::refresh_special_var_cache() {
+    if (!special_vars_dirty_) return;
+
+    cached_rs_ = env_.RS().to_string();
+    cached_fs_ = env_.FS().to_string();
+    cached_ofs_ = env_.OFS().to_string();
+    cached_ors_ = env_.ORS().to_string();
+    cached_ofmt_ = env_.OFMT().to_string();
+    cached_fpat_ = env_.FPAT().to_string();
+    cached_subsep_ = env_.SUBSEP().to_string();
+
+    special_vars_dirty_ = false;
+}
+
 const std::string& Interpreter::get_cached_rs() {
-    if (special_vars_dirty_) {
-        cached_rs_ = env_.RS().to_string();
-    }
+    refresh_special_var_cache();
     return cached_rs_;
 }
 
 const std::string& Interpreter::get_cached_fs() {
-    if (special_vars_dirty_) {
-        cached_fs_ = env_.FS().to_string();
-    }
+    refresh_special_var_cache();
     return cached_fs_;
 }
 
 const std::string& Interpreter::get_cached_ofs() {
-    if (special_vars_dirty_) {
-        cached_ofs_ = env_.OFS().to_string();
-    }
+    refresh_special_var_cache();
     return cached_ofs_;
 }
 
 const std::string& Interpreter::get_cached_ors() {
-    if (special_vars_dirty_) {
-        cached_ors_ = env_.ORS().to_string();
-    }
+    refresh_special_var_cache();
     return cached_ors_;
 }
 
 const std::string& Interpreter::get_cached_ofmt() {
-    if (special_vars_dirty_) {
-        cached_ofmt_ = env_.OFMT().to_string();
-    }
+    refresh_special_var_cache();
     return cached_ofmt_;
 }
 
 const std::string& Interpreter::get_cached_fpat() {
-    if (special_vars_dirty_) {
-        cached_fpat_ = env_.FPAT().to_string();
-    }
+    refresh_special_var_cache();
     return cached_fpat_;
 }
 
 const std::string& Interpreter::get_cached_subsep() {
-    if (special_vars_dirty_) {
-        cached_subsep_ = env_.SUBSEP().to_string();
-    }
+    refresh_special_var_cache();
     return cached_subsep_;
 }
 
@@ -143,7 +144,7 @@ void Interpreter::run(Program& program, const std::vector<std::string>& input_fi
 void Interpreter::process_file(const std::string& filename) {
     std::ifstream file(filename);
     if (!file) {
-        *error_ << "awk: can't open file " << filename << ": " << std::strerror(errno) << "\n";
+        *error_ << "awk: can't open file " << filename << ": " << safe_strerror(errno) << "\n";
         return;
     }
 
@@ -817,6 +818,9 @@ void Interpreter::parse_fields() {
     fields_.clear();
     fields_.reserve(16);  // Pre-allocate for typical field count
 
+    // Invalidate cached field AWKValues
+    std::fill(field_values_valid_.begin(), field_values_valid_.end(), false);
+
     // FPAT takes precedence over FS (gawk extension)
     // Use cached value for performance
     const std::string& fpat = get_cached_fpat();
@@ -934,12 +938,19 @@ AWKValue& Interpreter::get_field(int index) {
         fields_.push_back("");
     }
 
+    // Ensure field_values_ and validity vectors are large enough
     if (field_values_.size() < fields_.size()) {
         field_values_.resize(fields_.size());
+        field_values_valid_.resize(fields_.size(), false);
     }
 
-    field_values_[index - 1] = AWKValue::strnum(fields_[index - 1]);
-    return field_values_[index - 1];
+    // Only create AWKValue if not already cached
+    size_t idx = static_cast<size_t>(index - 1);
+    if (!field_values_valid_[idx]) {
+        field_values_[idx] = AWKValue::strnum(fields_[idx]);
+        field_values_valid_[idx] = true;
+    }
+    return field_values_[idx];
 }
 
 void Interpreter::set_field(int index, AWKValue value) {
@@ -961,6 +972,12 @@ void Interpreter::set_field(int index, AWKValue value) {
 
     fields_[index - 1] = value.to_string();
     fields_dirty_ = true;
+
+    // Invalidate cached AWKValue for this field
+    if (field_values_valid_.size() >= static_cast<size_t>(index)) {
+        field_values_valid_[index - 1] = false;
+    }
+
     env_.NF() = AWKValue(static_cast<double>(fields_.size()));
 }
 
@@ -1025,7 +1042,7 @@ std::ostream* Interpreter::get_output_stream(const std::string& target,
 #endif
 
         if (!pipe) {
-            *error_ << "awk: can't open pipe to command: " << target << ": " << std::strerror(errno) << "\n";
+            *error_ << "awk: can't open pipe to command: " << target << ": " << safe_strerror(errno) << "\n";
             return output_;
         }
 
@@ -1052,7 +1069,7 @@ std::ostream* Interpreter::get_output_stream(const std::string& target,
             output_pipes_["__coproc__" + target] = std::move(pipe_stream);
             return result;
         }
-        *error_ << "awk: can't open coprocess to command: " << target << ": " << std::strerror(errno) << "\n";
+        *error_ << "awk: can't open coprocess to command: " << target << ": " << safe_strerror(errno) << "\n";
         return output_;
     }
 
@@ -1069,7 +1086,7 @@ std::ostream* Interpreter::get_output_stream(const std::string& target,
 
     auto file = std::make_unique<std::ofstream>(target, mode);
     if (!file->is_open()) {
-        *error_ << "awk: can't open file " << target << " for output: " << std::strerror(errno) << "\n";
+        *error_ << "awk: can't open file " << target << " for output: " << safe_strerror(errno) << "\n";
         return output_;
     }
 

@@ -392,14 +392,23 @@ bool AWKValue::operator>=(const AWKValue& other) const {
 // ============================================================================
 
 AWKValue AWKValue::concatenate(const AWKValue& other) const {
-    // Optimize: pre-allocate to avoid reallocations
-    std::string s1 = to_string();
-    std::string s2 = other.to_string();
-    std::string result;
-    result.reserve(s1.length() + s2.length());
-    result = std::move(s1);
-    result += s2;
-    return AWKValue(std::move(result));
+    return AWKValue(to_string() + other.to_string());
+}
+
+void AWKValue::append_string(const std::string& str) {
+    // Convert to string type if needed, then append in place
+    if (type_ != ValueType::STRING) {
+        string_value_ = to_string();
+        type_ = ValueType::STRING;
+    }
+    // Pre-allocate more space to reduce reallocations
+    // When capacity is exceeded, grow by 2x or at least 4KB
+    if (string_value_.size() + str.size() > string_value_.capacity()) {
+        size_t new_cap = std::max(string_value_.capacity() * 2,
+                                  string_value_.size() + str.size() + 4096);
+        string_value_.reserve(new_cap);
+    }
+    string_value_ += str;
 }
 
 // ============================================================================

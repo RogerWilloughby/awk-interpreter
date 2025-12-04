@@ -140,6 +140,9 @@ public:
 
     AWKValue concatenate(const AWKValue& other) const;
 
+    // In-place string append (for optimization of s = s ... patterns)
+    void append_string(const std::string& str);
+
     // ========================================================================
     // Array Operations
     // ========================================================================

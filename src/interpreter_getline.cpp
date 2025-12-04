@@ -3,6 +3,7 @@
 // ============================================================================
 
 #include "awk/interpreter.hpp"
+#include "awk/platform.hpp"
 #include <cstdio>
 #include <cerrno>
 #include <cstring>
@@ -77,7 +78,7 @@ std::istream* Interpreter::get_input_file(const std::string& filename) {
     // Open new file
     auto file = std::make_unique<std::ifstream>(filename);
     if (!file->is_open()) {
-        *error_ << "awk: can't open file " << filename << " for reading: " << std::strerror(errno) << "\n";
+        *error_ << "awk: can't open file " << filename << " for reading: " << safe_strerror(errno) << "\n";
         return nullptr;
     }
 
@@ -105,7 +106,7 @@ FILE* Interpreter::get_input_pipe(const std::string& command) {
 #endif
 
     if (!pipe) {
-        *error_ << "awk: can't open pipe from command: " << command << ": " << std::strerror(errno) << "\n";
+        *error_ << "awk: can't open pipe from command: " << command << ": " << safe_strerror(errno) << "\n";
         return nullptr;
     }
 
