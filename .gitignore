@@ -1,0 +1,56 @@
+# Build directories
+build/
+cmake-build-*/
+out/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln
+*.vcxproj*
+CMakeSettings.json
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Package files
+*.tar.gz
+*.zip
+*.deb
+*.rpm
+*.msi
+
+# Test output
+Testing/
+test_results/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated files
+*.pc
+awkConfig.cmake
+awkConfigVersion.cmake
+awkTargets.cmake
+
+# Benchmark data (large files)
+benchmarks/large_data.csv

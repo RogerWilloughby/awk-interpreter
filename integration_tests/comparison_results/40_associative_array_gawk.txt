@@ -1,0 +1,5 @@
+Department Summary:
+  Marketing   : 2 employees, avg salary: 61500
+  Sales       : 3 employees, avg salary: 69667
+  Engineering : 4 employees, avg salary: 85000
+  HR          : 1 employees, avg salary: 55000

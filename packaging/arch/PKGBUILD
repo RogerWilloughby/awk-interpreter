@@ -1,0 +1,53 @@
+# Maintainer: Your Name <your@email.com>
+# Contributor: Your Name <your@email.com>
+
+pkgname=awk-interpreter
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="AWK interpreter with POSIX compliance and gawk extensions"
+arch=('x86_64' 'aarch64')
+url="https://github.com/yourusername/awk"
+license=('MIT')
+depends=('gcc-libs')
+makedepends=('cmake' 'gcc')
+provides=('awk')
+conflicts=('gawk' 'nawk' 'mawk')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/yourusername/awk/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')  # Replace with actual checksum after release
+
+build() {
+    cd "$srcdir/awk-$pkgver"
+
+    cmake -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTS=OFF \
+        -DAWK_ENABLE_LTO=ON
+
+    cmake --build build
+}
+
+check() {
+    cd "$srcdir/awk-$pkgver"
+
+    # Run basic tests
+    ./build/bin/awk 'BEGIN { print "test" }' | grep -q "test"
+}
+
+package() {
+    cd "$srcdir/awk-$pkgver"
+
+    DESTDIR="$pkgdir" cmake --install build
+
+    # Install license
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+    # Install documentation
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/$pkgname/CHANGELOG.md"
+
+    # Install additional docs
+    for doc in docs/*.md; do
+        install -Dm644 "$doc" "$pkgdir/usr/share/doc/$pkgname/$(basename $doc)"
+    done
+}

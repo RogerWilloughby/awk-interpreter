@@ -1,0 +1,8 @@
+Original: Hello, World!
+Length: 13
+Upper: HELLO, WORLD!
+Lower: hello, world!
+Substr(1,5): Hello
+Index of 'World': 8
+After sub: Hello, AWK!
+After gsub: XXX bar XXX baz XXX

@@ -1,0 +1,8 @@
+Coprocess read test:
+  echo result: hello
+Multi-line coprocess:
+  line1
+  line2
+  line3
+Command with args:
+  got: test output

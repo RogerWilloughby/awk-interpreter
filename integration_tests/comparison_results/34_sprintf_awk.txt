@@ -1,0 +1,8 @@
+Integer: 42
+Float: 3.14
+String: hello
+Padded: |      test|
+Left: |test      |
+Hex: ff
+Octal: 100
+Multiple: Alice is 30 years old

@@ -1,0 +1,19 @@
+pkgbase = awk-interpreter
+	pkgdesc = AWK interpreter with POSIX compliance and gawk extensions
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/yourusername/awk
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	makedepends = cmake
+	makedepends = gcc
+	depends = gcc-libs
+	provides = awk
+	conflicts = gawk
+	conflicts = nawk
+	conflicts = mawk
+	source = awk-interpreter-1.0.0.tar.gz::https://github.com/yourusername/awk/archive/refs/tags/v1.0.0.tar.gz
+	sha256sums = SKIP
+
+pkgname = awk-interpreter

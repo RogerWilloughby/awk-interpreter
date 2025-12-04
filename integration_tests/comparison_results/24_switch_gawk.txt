@@ -1,0 +1,14 @@
+[I] 2024-01-15 08:23:45 INFO Server started on port 8080
+[D] 2024-01-15 08:24:01 DEBUG Connection from 192.168.1.100
+[I] 2024-01-15 08:24:15 INFO User login: admin
+[W] 2024-01-15 08:25:33 WARNING High memory usage: 85%
+[E] 2024-01-15 08:26:00 ERROR Database connection failed
+[I] 2024-01-15 08:26:05 INFO Retrying database connection
+[I] 2024-01-15 08:26:10 INFO Database connected
+[D] 2024-01-15 08:30:22 DEBUG Processing request /api/users
+[E] 2024-01-15 08:30:45 ERROR Invalid authentication token
+[I] 2024-01-15 08:31:00 INFO User logout: admin
+[W] 2024-01-15 08:35:15 WARNING Disk space low: 10% remaining
+[I] 2024-01-15 08:40:00 INFO Scheduled backup started
+[I] 2024-01-15 08:45:30 INFO Scheduled backup completed
+[E] 2024-01-15 09:00:00 ERROR Connection timeout

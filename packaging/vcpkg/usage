@@ -1,0 +1,13 @@
+awk-interpreter provides CMake targets:
+
+    find_package(awk CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE awk::lib)
+
+To use the AWK interpreter in your project:
+
+    #include <awk.hpp>
+
+    int main() {
+        awk::run("BEGIN { print \"Hello, World!\" }");
+        return 0;
+    }

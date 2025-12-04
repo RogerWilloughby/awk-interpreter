@@ -1,0 +1,4 @@
+Namespace test:
+  math::square(5) = 25
+  math::cube(3) = 27
+  string::repeat(ab, 4) = abababab

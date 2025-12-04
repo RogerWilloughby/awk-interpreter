@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DBUILD_TESTS=OFF \
+		-DAWK_ENABLE_LTO=ON
+
+override_dh_auto_test:
+	# Skip tests during package build
+	true
+
+override_dh_install:
+	dh_install
+	# Install additional documentation
+	install -Dm644 docs/*.md -t debian/awk-interpreter/usr/share/doc/awk-interpreter/

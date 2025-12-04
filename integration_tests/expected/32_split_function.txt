@@ -1,0 +1,5 @@
+Split into 4 parts:
+  arr[1] = apple
+  arr[2] = banana
+  arr[3] = cherry
+  arr[4] = date

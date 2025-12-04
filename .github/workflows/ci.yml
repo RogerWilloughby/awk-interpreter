@@ -1,0 +1,133 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        build_type: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+
+      - name: Configure (GCC)
+        if: matrix.compiler == 'gcc'
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DBUILD_TESTS=ON \
+            -DCMAKE_CXX_COMPILER=g++
+
+      - name: Configure (Clang)
+        if: matrix.compiler == 'clang'
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DBUILD_TESTS=ON \
+            -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} -j$(nproc)
+
+      - name: Run unit tests
+        run: ./build/bin/awk_tests
+
+      - name: Run integration tests
+        run: |
+          cd integration_tests
+          chmod +x run_tests.sh
+          ./run_tests.sh
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DBUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} -j$(sysctl -n hw.ncpu)
+
+      - name: Run unit tests
+        run: ./build/bin/awk_tests
+
+      - name: Run integration tests
+        run: |
+          cd integration_tests
+          chmod +x run_tests.sh
+          ./run_tests.sh
+
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DBUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }}
+
+      - name: Run unit tests
+        run: ./build/bin/${{ matrix.build_type }}/awk_tests.exe
+
+      - name: Run integration tests
+        run: |
+          cd integration_tests
+          ./run_tests.bat
+
+  package:
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Create packages
+        run: |
+          cd build
+          cpack -G TGZ
+          cpack -G DEB
+          cpack --config CPackSourceConfig.cmake
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            build/*.tar.gz
+            build/*.deb

@@ -1,0 +1,12 @@
+Original array:
+  a[z] = cherry
+  a[a] = apple
+  a[m] = banana
+Sorted keys (asorti):
+  1: a
+  2: m
+  3: z
+Sorted values (asort):
+  1: apple
+  2: banana
+  3: cherry

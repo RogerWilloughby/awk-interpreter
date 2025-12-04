@@ -1,0 +1,4 @@
+Original: hello world hello
+gensub first: HELLO world hello
+gensub all: HELLO world HELLO
+Numbers: [foo:123][bar:456]baz

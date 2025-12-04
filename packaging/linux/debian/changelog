@@ -1,0 +1,9 @@
+awk-interpreter (1.0.0-1) unstable; urgency=medium
+
+  * Initial release
+  * Full POSIX AWK compliance
+  * gawk extensions: BEGINFILE/ENDFILE, switch/case, namespaces, coprocesses
+  * 50+ built-in functions
+  * 632 unit tests passing
+
+ -- Your Name <your@email.com>  Mon, 01 Jan 2024 00:00:00 +0000

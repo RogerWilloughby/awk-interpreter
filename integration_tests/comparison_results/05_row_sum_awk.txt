@@ -1,0 +1,5 @@
+Row 1 sum: 15
+Row 2 sum: 150
+Row 3 sum: 1500
+Row 4 sum: 105
+Row 5 sum: 45

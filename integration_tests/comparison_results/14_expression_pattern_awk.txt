@@ -1,0 +1,5 @@
+John Smith earns 75000
+Bob Johnson earns 82000
+Diana Lee earns 95000
+Eve Davis earns 72000
+Grace Taylor earns 88000

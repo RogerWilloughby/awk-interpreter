@@ -1,0 +1,13 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+include("${CMAKE_CURRENT_LIST_DIR}/awkTargets.cmake")
+
+check_required_components(awk)
+
+# Provide some helpful variables
+set(AWK_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set(AWK_LIBRARIES awk::lib)
+set(AWK_EXECUTABLE awk::awk)
+set(AWK_VERSION "@PROJECT_VERSION@")

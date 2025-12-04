@@ -1,0 +1,15 @@
+{
+  "name": "awk-interpreter",
+  "version": "1.0.0",
+  "description": "AWK interpreter with POSIX compliance and gawk extensions",
+  "homepage": "https://github.com/yourusername/awk",
+  "license": "MIT",
+  "supports": "!uwp",
+  "dependencies": [],
+  "default-features": [],
+  "features": {
+    "tools": {
+      "description": "Build the AWK executable"
+    }
+  }
+}

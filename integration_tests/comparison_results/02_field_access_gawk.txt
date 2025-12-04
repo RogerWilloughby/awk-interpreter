@@ -1,0 +1,10 @@
+John Smith works in Engineering - Salary: 75000
+Jane Doe works in Marketing - Salary: 65000
+Bob Johnson works in Engineering - Salary: 82000
+Alice Brown works in Sales - Salary: 70000
+Charlie Wilson works in Marketing - Salary: 58000
+Diana Lee works in Engineering - Salary: 95000
+Eve Davis works in Sales - Salary: 72000
+Frank Miller works in HR - Salary: 55000
+Grace Taylor works in Engineering - Salary: 88000
+Henry Anderson works in Sales - Salary: 67000

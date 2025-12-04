@@ -1,0 +1,9 @@
+product,quantity,price,category
+Laptop,5,999.99,Electronics
+Mouse,50,29.99,Electronics
+Desk,10,299.99,Furniture
+Chair,25,149.99,Furniture
+Keyboard,30,79.99,Electronics
+Monitor,15,399.99,Electronics
+Lamp,40,49.99,Furniture
+Headphones,20,199.99,Electronics

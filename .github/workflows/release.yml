@@ -1,0 +1,190 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: awk-linux-x64
+            package_type: tar.gz
+          - os: macos-latest
+            artifact: awk-macos-x64
+            package_type: tar.gz
+          - os: windows-latest
+            artifact: awk-windows-x64
+            package_type: zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DAWK_ENABLE_LTO=ON
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd build
+          cpack -G TGZ
+          mv *.tar.gz ../${{ matrix.artifact }}-${{ steps.version.outputs.version }}.tar.gz
+
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd build
+          cpack -G ZIP
+          cpack -G NSIS
+          Move-Item *.zip ../${{ matrix.artifact }}-${{ steps.version.outputs.version }}.zip
+          Move-Item *.exe ../${{ matrix.artifact }}-${{ steps.version.outputs.version }}-setup.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            *.tar.gz
+            *.zip
+            *-setup.exe
+
+  build-linux-packages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Build DEB package
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          cmake --build build --config Release
+          cd build
+          cpack -G DEB
+          mv *.deb ../awk-${{ steps.version.outputs.version }}-amd64.deb
+
+      - name: Build RPM package
+        run: |
+          sudo apt-get install -y rpm
+          cd build
+          cpack -G RPM
+          mv *.rpm ../awk-${{ steps.version.outputs.version }}-x86_64.rpm
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            *.deb
+            *.rpm
+
+  create-release:
+    needs: [build-release, build-linux-packages]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create source archive
+        run: |
+          git archive --format=tar.gz --prefix=awk-${{ steps.version.outputs.version }}/ HEAD > awk-${{ steps.version.outputs.version }}-source.tar.gz
+
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          find . -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "*.exe" \) -exec sha256sum {} \; > ../checksums.txt
+          cd ..
+          sha256sum awk-${{ steps.version.outputs.version }}-source.tar.gz >> checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: AWK Interpreter v${{ steps.version.outputs.version }}
+          draft: true
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/**/*.tar.gz
+            artifacts/**/*.zip
+            artifacts/**/*.deb
+            artifacts/**/*.rpm
+            artifacts/**/*.exe
+            awk-${{ steps.version.outputs.version }}-source.tar.gz
+            checksums.txt
+          body: |
+            ## AWK Interpreter v${{ steps.version.outputs.version }}
+
+            ### Downloads
+
+            | Platform | File |
+            |----------|------|
+            | Windows (installer) | `awk-windows-x64-${{ steps.version.outputs.version }}-setup.exe` |
+            | Windows (zip) | `awk-windows-x64-${{ steps.version.outputs.version }}.zip` |
+            | Linux (tar.gz) | `awk-linux-x64-${{ steps.version.outputs.version }}.tar.gz` |
+            | Linux (deb) | `awk-${{ steps.version.outputs.version }}-amd64.deb` |
+            | Linux (rpm) | `awk-${{ steps.version.outputs.version }}-x86_64.rpm` |
+            | macOS | `awk-macos-x64-${{ steps.version.outputs.version }}.tar.gz` |
+            | Source | `awk-${{ steps.version.outputs.version }}-source.tar.gz` |
+
+            ### Installation
+
+            **Windows:**
+            ```
+            # Run the installer, or extract zip and add to PATH
+            ```
+
+            **Linux (Debian/Ubuntu):**
+            ```bash
+            sudo dpkg -i awk-${{ steps.version.outputs.version }}-amd64.deb
+            ```
+
+            **Linux (Fedora/RHEL):**
+            ```bash
+            sudo rpm -i awk-${{ steps.version.outputs.version }}-x86_64.rpm
+            ```
+
+            **macOS (Homebrew):**
+            ```bash
+            brew install --build-from-source path/to/awk.rb
+            ```
+
+            **From source:**
+            ```bash
+            tar xzf awk-${{ steps.version.outputs.version }}-source.tar.gz
+            cd awk-${{ steps.version.outputs.version }}
+            cmake -B build -DCMAKE_BUILD_TYPE=Release
+            cmake --build build
+            sudo cmake --install build
+            ```
+
+            ### Checksums
+
+            See `checksums.txt` for SHA256 checksums of all files.

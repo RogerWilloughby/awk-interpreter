@@ -1,0 +1,11 @@
+i18n Functions Test:
+====================
+dcgettext test:
+  dcgettext(Hello) = Hello
+  dcgettext(Goodbye, myapp) = Goodbye
+dcngettext test:
+  dcngettext(file, files, 1) = file
+  dcngettext(file, files, 5) = files
+bindtextdomain test:
+  bindtextdomain(myapp, /usr/share/locale) = myapp
+  bindtextdomain(myapp) = myapp

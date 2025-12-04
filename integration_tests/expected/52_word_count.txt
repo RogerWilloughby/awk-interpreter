@@ -1,0 +1,6 @@
+Word Frequency (words appearing more than once):
+  quick     : 2
+  the       : 3
+  my        : 2
+  five      : 2
+  jump      : 2

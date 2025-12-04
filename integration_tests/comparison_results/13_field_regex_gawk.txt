@@ -1,0 +1,4 @@
+John Smith - Engineer, salary: 75000
+Bob Johnson - Engineer, salary: 82000
+Diana Lee - Engineer, salary: 95000
+Grace Taylor - Engineer, salary: 88000

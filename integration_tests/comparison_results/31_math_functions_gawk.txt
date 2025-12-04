@@ -1,0 +1,6 @@
+sin(0): 0
+cos(0): 1
+sqrt(16): 4
+int(3.7): 3
+int(-3.7): -3
+gawk: /c/Users/Roger/Documents/Cody/Claude/awk/integration_tests/scripts/31_math_functions.awk:8: fatal: function `abs' not defined

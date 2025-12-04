@@ -1,0 +1,12 @@
+Log Analysis Report
+===================
+Message counts:
+  WARNING : 2
+  ERROR   : 3
+  DEBUG   : 2
+  INFO    : 7
+
+Error details:
+  Line 5: 2024-01-15 08:26:00 ERROR Database connection failed
+  Line 9: 2024-01-15 08:30:45 ERROR Invalid authentication token
+  Line 14: 2024-01-15 09:00:00 ERROR Connection timeout

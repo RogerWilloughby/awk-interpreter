@@ -1,0 +1,35 @@
+Source: awk-interpreter
+Section: interpreters
+Priority: optional
+Maintainer: Your Name <your@email.com>
+Build-Depends: debhelper-compat (= 13), cmake (>= 3.16), g++ (>= 8)
+Standards-Version: 4.6.0
+Homepage: https://github.com/yourusername/awk
+Vcs-Browser: https://github.com/yourusername/awk
+Vcs-Git: https://github.com/yourusername/awk.git
+Rules-Requires-Root: no
+
+Package: awk-interpreter
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: awk
+Conflicts: gawk, mawk, original-awk
+Replaces: gawk, mawk, original-awk
+Description: AWK interpreter with POSIX compliance and gawk extensions
+ A complete AWK interpreter implemented in C++17 with:
+  - Full POSIX AWK compliance
+  - Extensive gawk (GNU AWK) extensions
+  - 50+ built-in functions
+  - Cross-platform support
+ .
+ Features include BEGINFILE/ENDFILE, switch/case, namespaces,
+ coprocesses, and comprehensive regex support.
+
+Package: libawk-dev
+Architecture: any
+Section: libdevel
+Depends: awk-interpreter (= ${binary:Version}), ${misc:Depends}
+Description: AWK interpreter development files
+ Development files for embedding the AWK interpreter in C++ applications.
+ .
+ Includes header files, static library, and CMake configuration.
