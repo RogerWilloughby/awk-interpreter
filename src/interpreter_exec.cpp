@@ -203,9 +203,11 @@ void Interpreter::execute(PrintStmt& stmt) {
         rebuild_record();  // Important: rebuild record from modified fields
         *out << current_record_;
     } else {
-        std::string ofs = env_.OFS().to_string();
-        bool first = true;
+        // Cache OFS and OFMT for the loop to avoid repeated lookups
+        const std::string& ofs = get_cached_ofs();
+        const std::string& ofmt = get_cached_ofmt();
 
+        bool first = true;
         for (auto& arg : stmt.arguments) {
             if (!first) {
                 *out << ofs;
@@ -213,11 +215,11 @@ void Interpreter::execute(PrintStmt& stmt) {
             first = false;
 
             AWKValue val = evaluate(*arg);
-            *out << val.to_string(env_.OFMT().to_string());
+            *out << val.to_string(ofmt);
         }
     }
 
-    *out << env_.ORS().to_string();
+    *out << get_cached_ors();
 }
 
 void Interpreter::execute(PrintfStmt& stmt) {

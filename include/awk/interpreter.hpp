@@ -328,6 +328,8 @@ private:
     mutable std::string cached_rs_;
     mutable std::string cached_fs_;
     mutable std::string cached_ofs_;
+    mutable std::string cached_ors_;
+    mutable std::string cached_ofmt_;
     mutable std::string cached_fpat_;
     mutable std::string cached_subsep_;
     mutable bool special_vars_dirty_ = true;
@@ -336,6 +338,8 @@ private:
     const std::string& get_cached_rs();
     const std::string& get_cached_fs();
     const std::string& get_cached_ofs();
+    const std::string& get_cached_ors();
+    const std::string& get_cached_ofmt();
     const std::string& get_cached_fpat();
     const std::string& get_cached_subsep();
     void invalidate_special_var_cache() { special_vars_dirty_ = true; }

@@ -58,6 +58,20 @@ const std::string& Interpreter::get_cached_ofs() {
     return cached_ofs_;
 }
 
+const std::string& Interpreter::get_cached_ors() {
+    if (special_vars_dirty_) {
+        cached_ors_ = env_.ORS().to_string();
+    }
+    return cached_ors_;
+}
+
+const std::string& Interpreter::get_cached_ofmt() {
+    if (special_vars_dirty_) {
+        cached_ofmt_ = env_.OFMT().to_string();
+    }
+    return cached_ofmt_;
+}
+
 const std::string& Interpreter::get_cached_fpat() {
     if (special_vars_dirty_) {
         cached_fpat_ = env_.FPAT().to_string();
@@ -1171,22 +1185,24 @@ static void parse_format_precision(const std::string& format, size_t& i, std::st
 }
 
 // Helper: Format a single value according to conversion specifier
+// Optimized version with larger buffer and direct string handling for %s
 static std::string format_value(char conv, const std::string& spec, const AWKValue& arg) {
-    char buffer[256];
+    // Use larger buffer for numeric formats (1024 handles extreme precision)
+    char buffer[1024];
 
     switch (conv) {
         case 'd':
         case 'i':
             std::snprintf(buffer, sizeof(buffer), spec.c_str(),
                          static_cast<long long>(arg.to_number()));
-            break;
+            return buffer;
         case 'o':
         case 'x':
         case 'X':
         case 'u':
             std::snprintf(buffer, sizeof(buffer), spec.c_str(),
                          static_cast<unsigned long long>(arg.to_number()));
-            break;
+            return buffer;
         case 'e':
         case 'E':
         case 'f':
@@ -1194,32 +1210,37 @@ static std::string format_value(char conv, const std::string& spec, const AWKVal
         case 'g':
         case 'G':
             std::snprintf(buffer, sizeof(buffer), spec.c_str(), arg.to_number());
-            break;
+            return buffer;
         case 'c': {
             std::string s = arg.to_string();
             if (!s.empty()) {
-                std::snprintf(buffer, sizeof(buffer), "%c", s[0]);
-            } else {
-                buffer[0] = '\0';
+                return std::string(1, s[0]);
             }
-            break;
+            return "";
         }
-        case 's':
-            std::snprintf(buffer, sizeof(buffer), spec.c_str(),
-                         arg.to_string().c_str());
-            break;
+        case 's': {
+            // For strings, use dynamic allocation to handle any length
+            std::string str = arg.to_string();
+            // Check if we need special formatting (width/precision)
+            if (spec == "%s") {
+                return str;  // Fast path: no formatting needed
+            }
+            // Calculate required buffer size (string length + potential padding)
+            size_t required = str.length() + 256;
+            std::vector<char> dyn_buffer(required);
+            std::snprintf(dyn_buffer.data(), required, spec.c_str(), str.c_str());
+            return dyn_buffer.data();
+        }
         default:
-            buffer[0] = conv;
-            buffer[1] = '\0';
-            break;
+            return std::string(1, conv);
     }
-
-    return buffer;
 }
 
 std::string Interpreter::do_sprintf(const std::string& format,
                                     const std::vector<AWKValue>& args) {
     std::string result;
+    // Pre-allocate: estimate 2x format length + average arg contribution
+    result.reserve(format.length() * 2 + args.size() * 16);
     size_t arg_idx = 0;
     size_t i = 0;
 

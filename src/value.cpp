@@ -392,7 +392,14 @@ bool AWKValue::operator>=(const AWKValue& other) const {
 // ============================================================================
 
 AWKValue AWKValue::concatenate(const AWKValue& other) const {
-    return AWKValue(to_string() + other.to_string());
+    // Optimize: pre-allocate to avoid reallocations
+    std::string s1 = to_string();
+    std::string s2 = other.to_string();
+    std::string result;
+    result.reserve(s1.length() + s2.length());
+    result = std::move(s1);
+    result += s2;
+    return AWKValue(std::move(result));
 }
 
 // ============================================================================
